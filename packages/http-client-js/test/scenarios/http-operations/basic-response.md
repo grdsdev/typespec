@@ -95,7 +95,10 @@ export async function read(client: WidgetsClientContext, options?: ReadOptions):
   if (typeof options?.operationOptions?.onResponse === "function") {
     options?.operationOptions?.onResponse(response);
   }
-  if (+response.status === 200 && response.headers["content-type"]?.includes("application/json")) {
+  if (
+    +response.status === 200 &&
+    response.headers["content-type"]?.split(";")[0].trim().toLowerCase() === "application/json"
+  ) {
     return jsonWidgetToApplicationTransform(response.body)!;
   }
   throw createRestError(response);
@@ -147,7 +150,10 @@ export async function read(
   if (typeof options?.operationOptions?.onResponse === "function") {
     options?.operationOptions?.onResponse(response);
   }
-  if (+response.status === 200 && response.headers["content-type"]?.includes("application/json")) {
+  if (
+    +response.status === 200 &&
+    response.headers["content-type"]?.split(";")[0].trim().toLowerCase() === "application/json"
+  ) {
     return jsonWidgetToApplicationTransform(response.body)!;
   }
   if (+response.status === 204 && !response.body) {
@@ -208,10 +214,16 @@ export async function read(client: WidgetsClientContext, options?: ReadOptions):
   if (typeof options?.operationOptions?.onResponse === "function") {
     options?.operationOptions?.onResponse(response);
   }
-  if (+response.status === 200 && response.headers["content-type"]?.includes("application/json")) {
+  if (
+    +response.status === 200 &&
+    response.headers["content-type"]?.split(";")[0].trim().toLowerCase() === "application/json"
+  ) {
     return jsonWidgetToApplicationTransform(response.body)!;
   }
-  if (+response.status === 200 && response.headers["content-type"]?.includes("application/xml")) {
+  if (
+    +response.status === 200 &&
+    response.headers["content-type"]?.split(";")[0].trim().toLowerCase() === "application/xml"
+  ) {
     return jsonWidgetToApplicationTransform(response.body)!;
   }
   throw createRestError(response);

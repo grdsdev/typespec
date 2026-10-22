@@ -35,7 +35,8 @@ export async function foo(
   }
   if (
     +response.status === 200 &&
-    response.headers["content-type"]?.includes("application/octet-stream")
+    response.headers["content-type"]?.split(";")[0].trim().toLowerCase() ===
+      "application/octet-stream"
   ) {
     return response.body!;
   }

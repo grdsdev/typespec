@@ -37,8 +37,9 @@ export function HttpResponses(props: HttpResponsesProps) {
 
         let expression: Children = code`return;`;
 
+        // Compare the media type exactly, ignoring parameters such as `charset`.
         const contentTypeCheck = body
-          ? ` && response.headers["content-type"]?.includes("${contentType}")`
+          ? ` && response.headers["content-type"]?.split(";")[0].trim().toLowerCase() === ${JSON.stringify(getMediaType(contentType))}`
           : " && !response.body";
 
         if (body && (body.bodyKind === "single" || (type && !isVoidType(type)))) {
@@ -71,4 +72,8 @@ export function HttpResponses(props: HttpResponsesProps) {
       }}
     </For>
   );
+}
+
+function getMediaType(contentType: string | undefined): string | undefined {
+  return contentType?.split(";")[0].trim().toLowerCase();
 }

@@ -26,7 +26,10 @@ export async function get(client: TestClientContext, options?: GetOptions): Prom
   if (typeof options?.operationOptions?.onResponse === "function") {
     options?.operationOptions?.onResponse(response);
   }
-  if (+response.status === 200 && response.headers["content-type"]?.includes("application/json")) {
+  if (
+    +response.status === 200 &&
+    response.headers["content-type"]?.split(";")[0].trim().toLowerCase() === "application/json"
+  ) {
     return jsonBytesPropertyToApplicationTransform(response.body)!;
   }
   throw createRestError(response);

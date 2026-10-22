@@ -67,7 +67,10 @@ function linkDeserialize(response: PathUncheckedResponse, options?: LinkOptions)
   if (typeof options?.operationOptions?.onResponse === "function") {
     options?.operationOptions?.onResponse(response);
   }
-  if (+response.status === 200 && response.headers["content-type"]?.includes("application/json")) {
+  if (
+    +response.status === 200 &&
+    response.headers["content-type"]?.split(";")[0].trim().toLowerCase() === "application/json"
+  ) {
     return {
       pets: jsonArrayPetToApplicationTransform(response.body.pets),
     }!;
@@ -188,7 +191,10 @@ function linkDeserialize(response: PathUncheckedResponse, options?: LinkOptions)
   if (typeof options?.operationOptions?.onResponse === "function") {
     options?.operationOptions?.onResponse(response);
   }
-  if (+response.status === 200 && response.headers["content-type"]?.includes("application/json")) {
+  if (
+    +response.status === 200 &&
+    response.headers["content-type"]?.split(";")[0].trim().toLowerCase() === "application/json"
+  ) {
     return {
       pets: jsonArrayPetToApplicationTransform(response.body.pets),
       link: response.body.link,

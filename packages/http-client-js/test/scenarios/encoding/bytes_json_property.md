@@ -34,7 +34,10 @@ export async function foo(
   if (typeof options?.operationOptions?.onResponse === "function") {
     options?.operationOptions?.onResponse(response);
   }
-  if (+response.status === 200 && response.headers["content-type"]?.includes("application/json")) {
+  if (
+    +response.status === 200 &&
+    response.headers["content-type"]?.split(";")[0].trim().toLowerCase() === "application/json"
+  ) {
     return jsonBytesBodyToApplicationTransform(response.body)!;
   }
   throw createRestError(response);
