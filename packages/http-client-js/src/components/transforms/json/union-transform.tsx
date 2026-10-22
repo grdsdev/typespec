@@ -27,11 +27,19 @@ export function JsonUnionTransform(props: JsonUnionTransformProps) {
     );
   }
 
-  const variantType = props.type.variants.values().next().value!.type;
-
   if (!$.union.isExtensible(props.type)) {
     return props.itemRef;
   }
+
+  // An extensible union has a base variant that every other variant is assignable to,
+  // so the transform of the base variant handles every value.
+  const variants = Array.from(props.type.variants.values());
+  const baseVariant = variants.find((variant) =>
+    variants.every(
+      (other) => other === variant || $.type.isAssignableTo(other.type, variant.type, props.type),
+    ),
+  );
+  const variantType = (baseVariant ?? variants[0]).type;
 
   // TODO: Handle non-discriminated unions
   return <JsonTransform {...props} type={variantType} />;
