@@ -23,6 +23,11 @@ export function buildClientParameters(
         return [];
       }
 
+      if ($.modelProperty.isCredential(param)) {
+        // The credential stays positional. It is optional when every operation accepts `NoAuth`.
+        return [{ ...descriptor, optional: descriptor.optional || allowsAnonymous(client) }];
+      }
+
       if (!descriptor.optional) {
         return [descriptor];
       }
@@ -42,6 +47,24 @@ export function buildClientParameters(
   }
 
   return params;
+}
+
+/**
+ * Checks whether every operation of the client accepts anonymous requests (`NoAuth`).
+ * The credential parameter covers the schemes of the whole service, so it cannot tell on its own.
+ */
+function allowsAnonymous(client: cl.Client): boolean {
+  const { $ } = useTsp();
+  const auth = $.client.getAuth(client);
+  const operations = $.client.listHttpOperations(client);
+  return (
+    operations.length > 0 &&
+    operations.every((httpOperation) =>
+      (auth.operationsAuth.get(httpOperation.operation) ?? auth.defaultAuth).options.some(
+        (option) => option.all.every((ref) => ref.kind === "noAuth"),
+      ),
+    )
+  );
 }
 
 function buildClientParameterDescriptor(
