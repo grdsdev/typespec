@@ -131,7 +131,9 @@ export function getDefaultValue(
     }
   }
 
-  if ("value" in property.type && property.type.value !== undefined) {
+  // A literal type is only an implicit default when the property is required.
+  // An optional property is sent only when the caller sets it.
+  if (!property.optional && "value" in property.type && property.type.value !== undefined) {
     return JSON.stringify(property.type.value);
   }
 
