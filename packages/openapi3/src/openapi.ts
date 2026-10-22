@@ -844,7 +844,8 @@ function createOAPIEmitter(
       .map((op) => func(program, op.operation))
       .filter((op) => op !== undefined) as string[];
     if (values.length) {
-      return values.join(joinChar);
+      // Identical values, such as the same summary on every shared operation, appear once.
+      return [...new Set(values)].join(joinChar);
     } else {
       return undefined;
     }

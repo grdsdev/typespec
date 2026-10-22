@@ -360,6 +360,55 @@ worksFor(supportedVersions, ({ diagnoseOpenApiFor, openApiFor }) => {
     });
   });
 
+  it("does not repeat identical summaries and descriptions of shared routes", async () => {
+    const results = await openApiFor(
+      `
+      @service(#{title: "My Service"})
+      namespace Foo {
+        /** Creates a thing. */
+        @summary("Create")
+        @sharedRoute
+        @post
+        op createJson(@header contentType: "application/json", @body body: Record<string>): void;
+
+        /** Creates a thing. */
+        @summary("Create")
+        @sharedRoute
+        @post
+        op createText(@header contentType: "text/plain", @body body: string): void;
+      }
+      `,
+    );
+    deepStrictEqual(results.paths["/"].post.summary, "Create");
+    deepStrictEqual(results.paths["/"].post.description, "Creates a thing.");
+  });
+
+  it("joins different summaries and descriptions of shared routes", async () => {
+    const results = await openApiFor(
+      `
+      @service(#{title: "My Service"})
+      namespace Foo {
+        /** Creates a thing from JSON. */
+        @summary("Create from JSON")
+        @sharedRoute
+        @post
+        op createJson(@header contentType: "application/json", @body body: Record<string>): void;
+
+        /** Creates a thing from text. */
+        @summary("Create from text")
+        @sharedRoute
+        @post
+        op createText(@header contentType: "text/plain", @body body: string): void;
+      }
+      `,
+    );
+    deepStrictEqual(results.paths["/"].post.summary, "Create from JSON Create from text");
+    deepStrictEqual(
+      results.paths["/"].post.description,
+      "Creates a thing from JSON. Creates a thing from text.",
+    );
+  });
+
   it("model shared routes with different implicit request bodies", async () => {
     const results = await openApiFor(
       `
