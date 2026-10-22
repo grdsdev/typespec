@@ -49,14 +49,17 @@ const scalarTransformerMap = defineScalarTransformerMap({
   bytes: {
     toTransport: (itemRef, encoding) => {
       const { $ } = useTsp();
-      const bytesEncoding: BytesKnownEncoding | undefined =
-        (encoding?.encoding as BytesKnownEncoding) ??
-        (useDefaultEncoding("bytes") as BytesKnownEncoding);
+      const bytesEncoding: BytesKnownEncoding | "none" | undefined =
+        (encoding?.encoding as BytesKnownEncoding | undefined) ??
+        (useDefaultEncoding("bytes") as BytesKnownEncoding | "none");
       switch (bytesEncoding) {
         case "base64":
         case "base64url":
           const bytesEncodeRef = getEncodeUint8ArrayRef();
           return code`${bytesEncodeRef}(${itemRef}, "${bytesEncoding}")!`;
+        case "none":
+          // Raw binary payloads are sent as they are.
+          return passthroughTransformer(itemRef);
         default:
           reportDiagnostic($.program, {
             code: "unknown-encoding",
@@ -67,15 +70,18 @@ const scalarTransformerMap = defineScalarTransformerMap({
     },
     toApplication: (itemRef, encoding) => {
       const { $ } = useTsp();
-      const bytesEncoding: BytesKnownEncoding | undefined =
-        (encoding?.encoding as BytesKnownEncoding) ??
-        (useDefaultEncoding("bytes") as BytesKnownEncoding);
+      const bytesEncoding: BytesKnownEncoding | "none" | undefined =
+        (encoding?.encoding as BytesKnownEncoding | undefined) ??
+        (useDefaultEncoding("bytes") as BytesKnownEncoding | "none");
 
       switch (bytesEncoding) {
         case "base64":
         case "base64url":
           const bytesDecodeRef = getDecodeUint8ArrayRef();
           return code`${bytesDecodeRef}(${itemRef})!`;
+        case "none":
+          // Raw binary payloads are returned as they are.
+          return passthroughTransformer(itemRef);
         default:
           reportDiagnostic($.program, {
             code: "unknown-encoding",
