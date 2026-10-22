@@ -89,6 +89,29 @@ describe("httpOperation:getResponses", () => {
     expect(responses[2].statusCode).toBe("*");
     expect(responses[2].contentType).toBe("application/json");
   });
+
+  it("should get one response per content type when the content type is a union", async () => {
+    const { getFoo, program } = await Tester.compile(t.code`
+      model ${t.model("Foo")} {
+        name: string;
+      }
+
+      @route("/foo")
+      @get
+      op ${t.op("getFoo")}(): {
+        @header contentType: "application/json" | "application/merge-patch+json";
+        @body body: Foo;
+      };
+    `);
+
+    const httpOperation = $(program).httpOperation.get(getFoo);
+    const responses = $(program).httpOperation.flattenResponses(httpOperation);
+    expect(responses).toHaveLength(2);
+    expect(responses[0].statusCode).toBe(200);
+    expect(responses[0].contentType).toBe("application/json");
+    expect(responses[1].statusCode).toBe(200);
+    expect(responses[1].contentType).toBe("application/merge-patch+json");
+  });
 });
 
 it("should get diagnostics from httpOperation.get", async () => {

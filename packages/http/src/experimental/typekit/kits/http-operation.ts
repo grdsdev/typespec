@@ -122,20 +122,27 @@ defineKit<TypekitExtension>({
             (property) => property.kind === "contentType",
           );
 
-          let contentType: string | undefined;
+          let contentTypes: (string | undefined)[];
 
-          if (contentTypeProperty) {
-            contentType = (contentTypeProperty.property.type as StringLiteral).value;
+          if (contentTypeProperty && responseContent.body?.contentTypes.length) {
+            // A union of content types produces one entry per content type.
+            contentTypes = responseContent.body.contentTypes;
+          } else if (contentTypeProperty) {
+            contentTypes = [(contentTypeProperty.property.type as StringLiteral).value];
           } else if (responseContent.body) {
-            contentType = "application/json";
+            contentTypes = ["application/json"];
+          } else {
+            contentTypes = [undefined];
           }
 
-          responsesMap.push({
-            statusCode: response.statusCodes,
-            contentType,
-            responseContent,
-            type: response.type,
-          });
+          for (const contentType of contentTypes) {
+            responsesMap.push({
+              statusCode: response.statusCodes,
+              contentType,
+              responseContent,
+              type: response.type,
+            });
+          }
         }
       }
 
